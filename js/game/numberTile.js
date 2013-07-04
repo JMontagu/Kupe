@@ -1,7 +1,8 @@
 ﻿var KUPE = KUPE || {};
 
-KUPE.numberTile = function (number) {
+KUPE.numberTile = function (number, colour) {
     var _number = number,
+		_colour = colour,
         _callback;
 
     var diceRollEvent = function (msg, data) {
@@ -30,7 +31,7 @@ KUPE.numberTile = function (number) {
 		var canvas1 = document.createElement('canvas');
 		var context1 = canvas1.getContext('2d');
 		context1.font = "Bold 80px Arial";
-		context1.fillStyle = "rgba(0,0,0,1)";
+		context1.fillStyle = _colour;
 	    context1.fillText(_number, 100, 100);
 	    
 		// canvas contents will be used for a texture

@@ -8,6 +8,9 @@
 var KUPE = KUPE || {};
 
 KUPE.tileGenerator = function () {
+	var TOKEN_COLOUR_NORMAL = '#000000',
+		TOKEN_COLOUR_SPECIAL = '#FF0000';
+
     var resources = [   { 
 							Terrain: { 
 								Name: "Forest", 
@@ -59,17 +62,17 @@ KUPE.tileGenerator = function () {
 							HasRobber: true
 						}]
 
-    var numberTokens = [{ Number: 2, Quantity: 1 },
-                        { Number: 3, Quantity: 2 },
-                        { Number: 4, Quantity: 2 },
-                        { Number: 5, Quantity: 2 },
-                        { Number: 6, Quantity: 2 },
+    var numberTokens = [{ Number: 2, Quantity: 1, Colour: TOKEN_COLOUR_NORMAL },
+                        { Number: 3, Quantity: 2, Colour: TOKEN_COLOUR_NORMAL },
+                        { Number: 4, Quantity: 2, Colour: TOKEN_COLOUR_NORMAL },
+                        { Number: 5, Quantity: 2, Colour: TOKEN_COLOUR_NORMAL },
+                        { Number: 6, Quantity: 2, Colour: TOKEN_COLOUR_SPECIAL },
                         // ROBBER 7
-                        { Number: 8, Quantity: 2 },
-                        { Number: 9, Quantity: 2 },
-                        { Number: 10, Quantity: 2 },
-                        { Number: 11, Quantity: 2 },
-                        { Number: 12, Quantity: 1 }];
+                        { Number: 8, Quantity: 2, Colour: TOKEN_COLOUR_SPECIAL },
+                        { Number: 9, Quantity: 2, Colour: TOKEN_COLOUR_NORMAL },
+                        { Number: 10, Quantity: 2, Colour: TOKEN_COLOUR_NORMAL },
+                        { Number: 11, Quantity: 2, Colour: TOKEN_COLOUR_NORMAL },
+                        { Number: 12, Quantity: 1, Colour: TOKEN_COLOUR_NORMAL }];
 
     var getResource = function () {
         var i = Math.floor(Math.random() * resources.length);
@@ -89,7 +92,7 @@ KUPE.tileGenerator = function () {
 
         if (numberToken.Quantity > 0) {
             numberToken.Quantity -= 1;
-            return new KUPE.numberTile(numberToken.Number);
+            return new KUPE.numberTile(numberToken.Number, numberToken.Colour);
         } else {
             return getNumberToken();
         }
