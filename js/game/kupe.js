@@ -119,7 +119,7 @@ KUPE.tileGenerator = function () {
 
 				if(resource.HasRobber) {
 					console.log("Robber");
-					tile.robber = new KUPE.robber();
+					tile.takeRobber(new KUPE.robber());
 				}
 
 				tiles.push(tile);

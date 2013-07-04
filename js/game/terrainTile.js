@@ -10,7 +10,7 @@ KUPE.terrainTile = function (position, terrain, resourceCard, numberToken) {
 		_robber;
 
 	var hasRobber = function() {
-		return _robber !== 'undefined';
+		return _robber && _robber !== 'undefined';
 	}
 
 	if(_numberToken) {
@@ -81,13 +81,12 @@ KUPE.terrainTile = function (position, terrain, resourceCard, numberToken) {
 		
 		// Number token
 		if(_numberToken){
-			_numberToken.draw(scene, width, cx, cy);
+			_numberToken.draw(scene, cx, cy);
 		}
 
-		// if(hasRobber()) {
-			// console.log("Robber!");
-			// _robber.draw(scene, cx, cy);
-		// }
+		if(hasRobber()) {
+			_robber.draw(scene, cx, cy);
+		}
 		// var numberToken = new THREE.Shape();
 		// numberToken.arc(cx, cy, 1, 0,  Math.PI * 2, true );
 		// numberToken.fill();
@@ -107,6 +106,11 @@ KUPE.terrainTile = function (position, terrain, resourceCard, numberToken) {
 		hasRobber: hasRobber,
 		takeRobber: function(robber) {
 			_robber = robber;
+		},
+		giveRobber: function() {
+			var r = _robber;
+			_robber = null;
+			return r;
 		},
 		draw: draw,
 		animate: animate,

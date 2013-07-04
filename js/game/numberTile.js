@@ -6,6 +6,7 @@ KUPE.numberTile = function (number, colour) {
         _callback;
 
     var diceRollEvent = function (msg, data) {
+		console.log("Rolled");
         if (data === _number) {
             _callback();
         }
@@ -15,7 +16,7 @@ KUPE.numberTile = function (number, colour) {
         _callback = callback;
     };
 	
-	var draw = function(scene, radius, posX, posY) {
+	var draw = function(scene, posX, posY) {
 		// Draw number
 		var canvas = document.createElement('canvas');
 		var ctx = canvas.getContext('2d');
