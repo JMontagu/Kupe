@@ -26,18 +26,21 @@
 		<script src="js/game/kupe.js"></script>
 		
 		<script>
+			var kupeGame;
+			
+			function start() {			
+				kupeGame.createPlayer("Jade");
+				kupeGame.createPlayer("Craig");
+				kupeGame.start();
+			};
+			
 			$(function () {
 				var $gameBoard = $('#gameBoard');
-				window.kupeGame = new KUPE.game($gameBoard);
-				
-				kupeGame.createPlayer("Jade");
-				
-				kupeGame.start();
-				
-				setTimeout(function() {
-					kupeGame.rollDice();
-				}, 1000);
+				kupeGame = new KUPE.game($gameBoard);
+				start();
 			});
+			
+			
 		</script>
 	</body>
 </html>
