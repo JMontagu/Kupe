@@ -28,14 +28,14 @@
 		<script>
 			$(function () {
 				var $gameBoard = $('#gameBoard');
-				var game = new KUPE.game($gameBoard);
+				window.kupeGame = new KUPE.game($gameBoard);
 				
-				game.createPlayer("Jade");
+				kupeGame.createPlayer("Jade");
 				
-				game.start();
+				kupeGame.start();
 				
 				setTimeout(function() {
-					game.rollDice();
+					kupeGame.rollDice();
 				}, 1000);
 			});
 		</script>
