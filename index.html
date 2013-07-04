@@ -1,37 +1,42 @@
+<!DOCTYPE html>
 <html>
 	<head>
+	<!-- 	<script data-main="scripts/main" src="js/require.js"></script> -->
 	</head>
 	
-	<body>
-	
-		<button type="submit" text="Roll dice" id="roll-dice">Roll dice</button>
+	<body style="background-color: #EEE8CD">
+		<div>			
+			<div id="gameBoard" />
+		</div>
 	
 		<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.8/jquery.min.js"></script>
-		<script src="js/pubsub.js"></script>
-		<script src="js/dice.js"></script>
-		<script src="js/numberTile.js"></script>
-		<script src="js/resourceCard.js"></script>
-		<script src="js/resource.js"></script>
-		<script src="js/terrainTile.js"></script>
-		<script src="js/settlement.js"></script>
-		<script src="js/robber.js"></script>
-		<script src="js/player.js"></script>
-		<script src="js/kupe.js"></script>
+		<script src="js/lib/three.js"></script>
+		<script src="js/lib/orbitcontrols.js"></script>
+		<script src="js/lib/linkedList.js"></script>
+		<script src="js/lib/pubsub.js"></script>
+		<script src="js/lib/threex/threex.windowresize.js"></script>
+		<script src="js/game/dice.js"></script>
+		<script src="js/game/numberTile.js"></script>
+		<script src="js/game/resourceCard.js"></script>
+		<script src="js/game/resource.js"></script>
+		<script src="js/game/terrainTile.js"></script>
+		<script src="js/game/settlement.js"></script>
+		<script src="js/game/robber.js"></script>
+		<script src="js/game/player.js"></script>
+		<script src="js/game/kupe.js"></script>
 		
 		<script>
 			$(function () {
-				var game = new KUPE.game();
+			
+				var game;
+				var $gameBoard = $('#gameBoard');
 
+				(function() {
+					game = new KUPE.game($gameBoard);
+				})();
+				
 				game.createPlayer("Jade");
-				
-				var newSettlement = new KUPE.settlement([game.getResourceTiles()[2], game.getResourceTiles()[3], game.getResourceTiles()[4]]);
-				game.getCurrentPlayer().createSettlement(newSettlement);
-				
-				$("#roll-dice").click(function(evt) {
-					var diceNumber = game.rollDice();
-					console.log("Dice rolled: " + diceNumber);
-					return false;
-				});
+				game.start();
 			});
 		</script>
 	</body>

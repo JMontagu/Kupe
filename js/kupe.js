@@ -74,7 +74,7 @@ KUPE.game = (function () {
     var self = this,
         terrainTiles = [],
         robber,
-        players = [],
+        players = new LinkedList.Doubly.Circular(),
         currentPlayer,
         dice;
 
@@ -87,6 +87,7 @@ KUPE.game = (function () {
 
         PubSub.subscribe("diceRolled", robber.diceRolled);
         console.log("Tiles: " + terrainTiles.length);
+		
         self.dice = new KUPE.dice();
     };
 
