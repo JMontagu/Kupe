@@ -57,8 +57,7 @@ KUPE.tileGenerator = function () {
 								Name: "Desert", 
 								Colour: '#EDC9AF'
 							},
-							Quantity: 1,
-							HasRobber: true
+							Quantity: 1
 						}
 						]
 
@@ -116,11 +115,7 @@ KUPE.tileGenerator = function () {
 				}
 
 				tile = new KUPE.terrainTile({x: posX, y: i}, resource.Terrain, resource.Resource, numberToken);
-
-				if(resource.HasRobber) {
-					tile.takeRobber();
-				}
-
+				
 				tiles.push(tile);
 				posX += 1;
 			}
@@ -201,7 +196,13 @@ KUPE.game = (function () {
 		scene.add(parent);
 		
 		for (var i = terrainTiles.length; i--;) {
-			terrainTiles[i].draw(parent);
+			var tile = terrainTiles[i];
+			
+			tile.draw(parent);
+			
+			if(tile.getTerrain().Name === "Desert") {
+				self.robber = new KUPE.Robber(tile);
+			}
 		}
 		
 		scene.add(parent);
@@ -235,13 +236,12 @@ KUPE.game = (function () {
 			PubSub.subscribe(DICE_ROLLED, numberToken.diceRolled);
 		});
 
-		self.robber = new KUPE.robber();
-		PubSub.subscribe(DICE_ROLLED, self.robber.diceRolled);
-		
         self.dice = new KUPE.dice();
 		
 		drawBoard();
 		animate();
+		
+		PubSub.subscribe(DICE_ROLLED, self.robber.diceRolled);
 		
 		console.log("Game started");
 		gameHasStarted = true;
