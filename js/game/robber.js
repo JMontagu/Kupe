@@ -16,10 +16,10 @@ KUPE.robber = function () {
         var robber = new THREE.CubeGeometry(20, 50, 20)
         var material = new THREE.MeshBasicMaterial({color: 0x000000});
         var mesh = new THREE.Mesh(robber, material);
-		mesh.rotation.x = 90 * (Math.PI/180);
+		// mesh.rotation.x = 90 * (Math.PI/180);
         mesh.position.x = posX;
-        mesh.position.y = posY;
-		mesh.position.z = robber.height/2;
+        mesh.position.y = robber.height/2;
+		mesh.position.z = posY;
 
         scene.add(mesh);
     };

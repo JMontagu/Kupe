@@ -1,7 +1,10 @@
 ﻿var KUPE = KUPE || {};
 
-KUPE.terrainTile = function (position, terrain, resourceCard, numberToken) {
-    var _position = position,
+KUPE.terrainTile = function (arrayPos, terrain, resourceCard, numberToken) {
+	var TILE_SIZE = 120;
+
+    var _arrayPos = arrayPos,
+		_position = new THREE.Vector3(),
 		_resourceCard = resourceCard,
         _numberToken = numberToken,
 		_terrain = terrain,
@@ -9,6 +12,9 @@ KUPE.terrainTile = function (position, terrain, resourceCard, numberToken) {
 		_3dObjects = [],
 		_robber;
 
+	_position.x = _arrayPos.x * TILE_SIZE - (_arrayPos.y * TILE_SIZE) / 2,
+	_position.z = _arrayPos.y * (3/4 * TILE_SIZE);
+		
 	var hasRobber = function() {
 		return _robber && _robber !== 'undefined';
 	}
@@ -38,25 +44,23 @@ KUPE.terrainTile = function (position, terrain, resourceCard, numberToken) {
 		// }
 	};
 	
-	var draw = function(scene, offsetX, offsetY) {
-		var width = 120,
-			height = 120,
-			cx = (_position.x + offsetX) * width - (_position.y + offsetY) * width / 2,
-			cy = (_position.y + offsetY) * (3/4 * height);
+	var draw = function(scene) {
+		var cx = _position.x;
+		var cy = _position.z;
 		
 		// Rect
 		var terrainTile = new THREE.Shape();
-		terrainTile.moveTo(cx, cy - height/2);
-		terrainTile.lineTo(cx + width/2, cy - height/4);
-		terrainTile.lineTo(cx + width/2, cy + height/4);
-		terrainTile.lineTo(cx, cy + height/2);
-		terrainTile.lineTo(cx - width/2, cy + height/4);
-		terrainTile.lineTo(cx - width/2, cy - height/4);
-		terrainTile.lineTo(cx, cy - height/2);
+		terrainTile.moveTo(cx, cy - TILE_SIZE/2);
+		terrainTile.lineTo(cx + TILE_SIZE/2, cy - TILE_SIZE/4);
+		terrainTile.lineTo(cx + TILE_SIZE/2, cy + TILE_SIZE/4);
+		terrainTile.lineTo(cx, cy + TILE_SIZE/2);
+		terrainTile.lineTo(cx - TILE_SIZE/2, cy + TILE_SIZE/4);
+		terrainTile.lineTo(cx - TILE_SIZE/2, cy - TILE_SIZE/4);
+		terrainTile.lineTo(cx, cy - TILE_SIZE/2);
 		
 		var meshGeometry = new THREE.ShapeGeometry( terrainTile );
 		
-		terrainTile.lineTo(cx + width/2, cy - height/4);
+		terrainTile.lineTo(cx + TILE_SIZE/2, cy - TILE_SIZE/4);
 		var lineGeometry = new THREE.ShapeGeometry( terrainTile );
 		
 		var material = [
@@ -70,8 +74,8 @@ KUPE.terrainTile = function (position, terrain, resourceCard, numberToken) {
 		var mesh = THREE.SceneUtils.createMultiMaterialObject( meshGeometry, material );
 		var line = new THREE.Line( lineGeometry, lineMaterial, THREE.LineStrip );
 		
-		// mesh.position.set(0,-200,0);
-		// line.position.set(0,-200,0);
+		mesh.rotation.x = -90 * Math.PI / 180;
+		line.rotation.x = -90 * Math.PI / 180;
 
 		_3dObjects.push(mesh);
 		_3dObjects.push(line);
@@ -81,16 +85,12 @@ KUPE.terrainTile = function (position, terrain, resourceCard, numberToken) {
 		
 		// Number token
 		if(_numberToken){
-			_numberToken.draw(scene, cx, cy);
+			_numberToken.draw(scene, cx, -cy);
 		}
 
 		if(hasRobber()) {
-			_robber.draw(scene, cx, cy);
+			_robber.draw(scene, cx, -cy);
 		}
-		// var numberToken = new THREE.Shape();
-		// numberToken.arc(cx, cy, 1, 0,  Math.PI * 2, true );
-		// numberToken.fill();
-		// scene.add(numberToken);
 	};
 
     return {

@@ -57,10 +57,10 @@ KUPE.tileGenerator = function () {
 								Name: "Desert", 
 								Colour: '#EDC9AF'
 							},
-							Resource: null,
 							Quantity: 1,
 							HasRobber: true
-						}]
+						}
+						]
 
     var numberTokens = [{ Number: 2, Quantity: 1, Colour: TOKEN_COLOUR_NORMAL },
                         { Number: 3, Quantity: 2, Colour: TOKEN_COLOUR_NORMAL },
@@ -111,15 +111,14 @@ KUPE.tileGenerator = function () {
 					numberToken = null,
 					tile = null;
 
-				if(!resource.HasRobber) {
+				if(resource.Resource) {
 					numberToken = getNumberToken();
 				}
 
 				tile = new KUPE.terrainTile({x: posX, y: i}, resource.Terrain, resource.Resource, numberToken);
 
 				if(resource.HasRobber) {
-					console.log("Robber");
-					tile.takeRobber(new KUPE.robber());
+					tile.takeRobber();
 				}
 
 				tiles.push(tile);
@@ -155,9 +154,8 @@ KUPE.game = (function () {
 	var lastTimeMsec = null;
 	var angularSpeed = 0.1;
 
-	var camera, controls, scene, renderer, parent, container;
+	var camera, cameraControls, scene, renderer, parent, container;
 		
-
 	var PLAYER_COLOURS = ['Red', 'Blue', 'White', 'Orange'];
     var DICE_ROLLED = "diceRolled";
 
@@ -170,40 +168,43 @@ KUPE.game = (function () {
     };
 	
 	var init = function() {
-		camera = new THREE.PerspectiveCamera( VIEW_ANGLE, ASPECT, NEAR, FAR);
-		camera.position.z = 500;
-		//camera.position.set( 0, -200, 400 );
-		//.rotation.x = 20 * (Math.PI / 180);
+		renderer = new THREE.WebGLRenderer({ 
+			antialias: true 
+		});
+		renderer.setSize(SCREEN_WIDTH, SCREEN_HEIGHT);
 		
-		controls = new THREE.OrbitControls(camera);
-		controls.addEventListener('change', render);
-
 		scene = new THREE.Scene();
+		scene.fog = new THREE.FogExp2(0xcccccc, 0.001);
+		
+		camera = new THREE.PerspectiveCamera( VIEW_ANGLE, ASPECT, NEAR, FAR);
+		camera.position.z = 300;
+		scene.add(camera);
+
+		cameraControls = new THREE.OrbitControls(camera);
+		cameraControls.maxPolarAngle = Math.PI/3; 
+		cameraControls.minDistance = 150;
+		cameraControls.maxDistance = 600;
+		cameraControls.addEventListener('change', render);
+		
+		// Support window resize
+		THREEx.WindowResize(renderer, camera);
 
 		var light = new THREE.DirectionalLight(0xffffff, 1);
-		light.position.set( 0, 0, 1);
+		light.position.set( 0, 1, 1);
 		scene.add( light );
-
-		renderer = new THREE.WebGLRenderer( { antialias: true } );
-		renderer.setSize(SCREEN_WIDTH, SCREEN_HEIGHT);
-
-		THREEx.WindowResize(renderer, camera);
 
 		self.container.append( renderer.domElement );
 	};
 
 	function drawBoard() {
 		parent = new THREE.Object3D();
-		
 		scene.add(parent);
 		
 		for (var i = terrainTiles.length; i--;) {
-			terrainTiles[i].draw(parent, -1, 0);
+			terrainTiles[i].draw(parent);
 		}
 		
 		scene.add(parent);
-		
-		parent.position.set(0,-200,0);
 	};
 	
 	function render() {
@@ -211,16 +212,9 @@ KUPE.game = (function () {
 	}
 	
 	function animate() {
-		// var time = (new Date()).getTime();
-  //       var timeDiff = Math.min(200, time - lastTimeMsec);
-  //       lastTimeMsec = time;
-
-  //       var angleChange = angularSpeed * timeDiff * 2 * Math.PI / 1000;
-
-		
-		 
 		requestAnimationFrame(animate);
-        controls.update();
+		render();
+        cameraControls.update();
 	};
 	
 	var getPlayer = function() {
