@@ -7,6 +7,10 @@
 
 var KUPE = KUPE || {};
 
+KUPE.settings = {
+	TILE_SIZE : 120
+}
+
 KUPE.tileGenerator = function () {
 	var TOKEN_COLOUR_NORMAL = '#000000',
 		TOKEN_COLOUR_SPECIAL = '#FF0000';
@@ -112,17 +116,33 @@ KUPE.tileGenerator = function () {
 
 				if(resource.Resource) {
 					numberToken = getNumberToken();
+					callback(numberToken);
 				}
 
-				tile = new KUPE.terrainTile({x: posX, y: i}, resource.Terrain, resource.Resource, numberToken);
+				var pos = new THREE.Vector3(posX * (KUPE.settings.TILE_SIZE+2), 
+											0, 
+											i * ((KUPE.settings.TILE_SIZE+2)*0.75));
+
+				// HACK
+				if(i === Math.floor(tilePattern.length/2)) {
+					pos.x += (KUPE.settings.TILE_SIZE);
+				} else if (i === 1 || i === 3) {
+					pos.x += (KUPE.settings.TILE_SIZE/2);
+				}
+
+				tile = new KUPE.terrainTile(pos, resource.Terrain, resource.Resource, numberToken);
 				
 				tiles.push(tile);
+
 				posX += 1;
 			}
 			
-			if(tilePattern[i] > tilePattern[i+1]) {
-				startX += 1;
+			 if(tilePattern[i] < tilePattern[i+1]){
+			 	startX--;
+			} else {
+				startX++;
 			}
+			
 		}
 
         return tiles;
@@ -145,14 +165,21 @@ KUPE.game = (function () {
 		tileGenerator;
 		
 	var SCREEN_WIDTH = window.innerWidth, SCREEN_HEIGHT = window.innerHeight;
-	var VIEW_ANGLE = 75, ASPECT = SCREEN_WIDTH / SCREEN_HEIGHT, NEAR = 0.1, FAR = 20000;
+	var VIEW_ANGLE = 50, ASPECT = SCREEN_WIDTH / SCREEN_HEIGHT, NEAR = 0.1, FAR = 20000;
 	var lastTimeMsec = null;
 	var angularSpeed = 0.1;
 
-	var camera, cameraControls, scene, renderer, parent, container;
+	var camera, 
+		cameraControls, 
+		scene, 
+		renderer, 
+		projector, 
+		parent, 
+		container;
 		
 	var PLAYER_COLOURS = ['Red', 'Blue', 'White', 'Orange'];
-    var DICE_ROLLED = "diceRolled";
+    var DICE_ROLLED = "diceRolled",
+    	PLAYER_JOINED = "playerJoined";
 
     var game = function (container) {
 		self.tileGenerator = new KUPE.tileGenerator();
@@ -164,36 +191,79 @@ KUPE.game = (function () {
 	
 	var init = function() {
 		renderer = new THREE.WebGLRenderer({ 
-			antialias: true 
+			antialias: true
 		});
 		renderer.setSize(SCREEN_WIDTH, SCREEN_HEIGHT);
+		renderer.shadowMapEnabled = true;
+		renderer.shadowMapSoft = true;
 		
 		scene = new THREE.Scene();
 		scene.fog = new THREE.FogExp2(0xcccccc, 0.001);
 		
 		camera = new THREE.PerspectiveCamera( VIEW_ANGLE, ASPECT, NEAR, FAR);
-		camera.position.z = 300;
+		camera.position.z = 600;
 		scene.add(camera);
 
 		cameraControls = new THREE.OrbitControls(camera);
 		cameraControls.maxPolarAngle = Math.PI/3; 
-		cameraControls.minDistance = 150;
+		cameraControls.minDistance = 50;
 		cameraControls.maxDistance = 600;
+		//cameraControls.autoRotate = true;
 		cameraControls.addEventListener('change', render);
 		
-		// Support window resize
-		THREEx.WindowResize(renderer, camera);
+		var light = new THREE.DirectionalLight(0xffffff);
+		light.position.set(0, 200, 300);
+		light.target.position.set(0, 0, 0);
+		light.castShadow = true;
+		light.shadowDarkness = 1;
+		light.shadowCameraVisible = true; // only for debugging
+		// these six values define the boundaries of the yellow box seen above
+		light.shadowCameraNear = 50;
+		light.shadowCameraFar = 555;
+		light.shadowCameraLeft = -50;
+		light.shadowCameraRight = 50;
+		light.shadowCameraTop = 50;
+		light.shadowCameraBottom = -50;
+		scene.add(light);
 
-		var light = new THREE.DirectionalLight(0xffffff, 1);
-		light.position.set( 0, 1, 1);
-		scene.add( light );
+		projector = new THREE.Projector();
 
 		self.container.append( renderer.domElement );
+
+		// Wire up events
+		document.addEventListener('mousedown', onDocumentMouseDown, false);
+
+		THREEx.WindowResize(renderer, camera);
+
+	};
+
+	function onDocumentMouseDown(event) {
+		event.preventDefault();
+
+		var vector = new THREE.Vector3((event.clientX / window.innerWidth) * 2 - 1, - (event.clientY / window.innerHeight) * 2 + 1, 0.5);
+		projector.unprojectVector(vector, camera);
+
+		var raycaster = new THREE.Raycaster(camera.position, vector.sub(camera.position).normalize());
+
+		//var intersects = raycaster.intersectObjects(scene.children);
+		var ingameObjects = [];
+
+		for (var i = terrainTiles.length; i--;) {
+			ingameObjects.push(terrainTiles[i].object());
+		}
+
+		ingameObjects.push(self.robr.object());
+
+		var intersects = raycaster.intersectObjects(ingameObjects);
+
+		if ( intersects.length > 0 ) {
+			intersects[0].object.material.color.setHex(Math.random() * 0xffffff);
+		}
 	};
 
 	function drawBoard() {
 		parent = new THREE.Object3D();
-		scene.add(parent);
+		//scene.add(parent);
 		
 		for (var i = terrainTiles.length; i--;) {
 			var tile = terrainTiles[i];
@@ -201,11 +271,14 @@ KUPE.game = (function () {
 			tile.draw(parent);
 			
 			if(tile.getTerrain().Name === "Desert") {
-				self.robber = new KUPE.Robber(tile);
+				// Robber starts game on the Desert tile
+				self.robr = new KUPE.Robber(tile);
+				PubSub.subscribe(DICE_ROLLED, self.robr.diceRolled);
 			}
 		}
-		
-		scene.add(parent);
+
+		scene.add(parent);	
+		cameraControls.center = terrainTiles[9].position;
 	};
 	
 	function render() {
@@ -240,20 +313,19 @@ KUPE.game = (function () {
 		
 		drawBoard();
 		animate();
-		
-		PubSub.subscribe(DICE_ROLLED, self.robber.diceRolled);
-		
-		console.log("Game started");
-		gameHasStarted = true;
-		getPlayer();
+
 		startTurn();
 	};
 	
 	var startTurn = function() {
-		if(!gameHasStarted) {
-			return;
+		if(!self.robr) {
+			// Sanity check
+			throw "Robber object has not been added to game";
 		}
 		
+		console.log("Game started");
+		gameHasStarted = true;
+		getPlayer();
 		console.log(getPlayer().getName() + " turn");
 	};
 	
@@ -268,8 +340,8 @@ KUPE.game = (function () {
 			return "Please place the Robber";
 		}
 		
-		getNextPlayer();
 		diceHasBeenRolled = false;
+		getNextPlayer();
 		startTurn();
 	};
 
@@ -277,10 +349,15 @@ KUPE.game = (function () {
 		if(gameHasStarted) {
 			throw "cannot create a new player as the game has started";
 		}
+		if(PLAYER_COLOURS.length === 0) {
+			throw "Maximum number of players have joined this game";
+		}
 		
         var newPlayer = new KUPE.player(PLAYER_COLOURS.pop(), name);
         players.insert(newPlayer);
-        console.log("New player joined: " + name);
+
+        PubSub.publish(PLAYER_JOINED, newPlayer);
+        console.log(name + " has joined the game");
 
 		return newPlayer;
     }
@@ -291,8 +368,8 @@ KUPE.game = (function () {
 		}
 		
         var number = self.dice.rollPair();
+        diceHasBeenRolled = true;
         PubSub.publish(DICE_ROLLED, number);
-		diceHasBeenRolled = true;
 		
 		console.log("Dice rolled: " + number);
 		
@@ -308,7 +385,7 @@ KUPE.game = (function () {
 		players: function() {
 			return players;
 		},
-        getCurrentPlayer: currentPlayer,
+        currentPlayer: getPlayer,
         getResourceTiles: function() {
             return terrainTiles;
         }

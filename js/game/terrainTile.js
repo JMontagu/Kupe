@@ -1,99 +1,129 @@
 ﻿var KUPE = KUPE || {};
 
-KUPE.terrainTile = function (arrayPos, terrain, resourceCard, numberToken) {
+KUPE.terrainTile = (function() {
 	var TILE_SIZE = 120;
 
-    var _arrayPos = arrayPos,
-		_position = new THREE.Vector3(),
-		_resourceCard = resourceCard,
-        _numberToken = numberToken,
-		_terrain = terrain,
+    var self = this,
+    	_arrayPos,
+		_position,
+		_resourceCard,
+        _numberToken,
+		_terrain,
         _resourceSubscriptions = [],
-		_3dObject,
+		gameObject,
 		_hasRobber = false;
-
-	_position.x = _arrayPos.x * TILE_SIZE - (_arrayPos.y * TILE_SIZE) / 2,
-	_position.z = _arrayPos.y * (3/4 * TILE_SIZE);
 	
-	if(_numberToken) {
-		_numberToken.activated(function () {
-			if(_hasRobber) {
-				console.log("Robber stole " + _resourceCard.getName());
-				return;
-			}
+	function resourceCreated() {
+		if(_hasRobber) {
+			console.log("Robber stole " + _resourceCard.getName());
+			return;
+		}
 
-	        console.log("Created " + _resourceCard.getName());
+        console.log("Created " + _resourceCard.getName());
 
-	        for(var i = 0; i < _resourceSubscriptions.length; i++) {
-	            _resourceSubscriptions[i](_resourceCard);
-	        }
-	    });	
-	}
+        for(var i = 0; i < _resourceSubscriptions.length; i++) {
+            _resourceSubscriptions[i](_resourceCard);
+        }
+	};
 
-    var resourceCreatedSubscription = function(callback) {
+    function resourceCreatedSubscription(callback) {
         _resourceSubscriptions.push(callback);
     };
 	
-	var animate = function(angleChange) {
-
-	};
-	
-	var draw = function(scene) {
-		var cx = _position.x;
-		var cz = _position.z;
-		
+	function render(scene) {
+		var cx = 0//this.position.x;
+		var cz = 0//this.position.z;
+		// var mesh = new THREE.Mesh( new THREE.CubeGeometry( TILE_SIZE, TILE_SIZE, TILE_SIZE), new THREE.MeshNormalMaterial() );
+		// console.log(this.position);
+		// mesh.position.x = this.position.x;
+		// mesh.position.z = this.position.z;
+		// mesh.position.y = this.position.y;
 		// Rect
-		var terrainTile = new THREE.Shape();
-		terrainTile.moveTo(cx, cz - TILE_SIZE/2);
-		terrainTile.lineTo(cx + TILE_SIZE/2, cz - TILE_SIZE/4);
-		terrainTile.lineTo(cx + TILE_SIZE/2, cz + TILE_SIZE/4);
-		terrainTile.lineTo(cx, cz + TILE_SIZE/2);
-		terrainTile.lineTo(cx - TILE_SIZE/2, cz + TILE_SIZE/4);
-		terrainTile.lineTo(cx - TILE_SIZE/2, cz - TILE_SIZE/4);
-		terrainTile.lineTo(cx, cz - TILE_SIZE/2);
-		
-		var meshGeometry = new THREE.ShapeGeometry( terrainTile );
-		
-		terrainTile.lineTo(cx + TILE_SIZE/2, cz - TILE_SIZE/4);
-		var lineGeometry = new THREE.ShapeGeometry( terrainTile );
+		var tilePts = [];
+		tilePts.push( new THREE.Vector2 (cx, cz - TILE_SIZE/2) );
+		tilePts.push( new THREE.Vector2 (cx + TILE_SIZE/2, cz - TILE_SIZE/4) );
+		tilePts.push( new THREE.Vector2 (cx + TILE_SIZE/2, cz + TILE_SIZE/4) );
+		tilePts.push( new THREE.Vector2 (cx, cz + TILE_SIZE/2) );
+		tilePts.push( new THREE.Vector2 (cx - TILE_SIZE/2, cz + TILE_SIZE/4) );
+		tilePts.push( new THREE.Vector2 (cx - TILE_SIZE/2, cz - TILE_SIZE/4) );
+		tilePts.push( new THREE.Vector2 (cx, cz - TILE_SIZE/2) );
+		// var terrainTile = new THREE.Shape();
+		// terrainTile.moveTo(cx, cz - TILE_SIZE/2);
+		// terrainTile.lineTo(cx + TILE_SIZE/2, cz - TILE_SIZE/4);
+		// terrainTile.lineTo(cx + TILE_SIZE/2, cz + TILE_SIZE/4);
+		// terrainTile.lineTo(cx, cz + TILE_SIZE/2);
+		// terrainTile.lineTo(cx - TILE_SIZE/2, cz + TILE_SIZE/4);
+		// terrainTile.lineTo(cx - TILE_SIZE/2, cz - TILE_SIZE/4);
+		// terrainTile.lineTo(cx, cz - TILE_SIZE/2);
+		//terrainTile.lineTo(cx + TILE_SIZE/2, cz - TILE_SIZE/4);
+
+		var tileShape = new THREE.Shape(tilePts);
+		var extrusionSettings = {
+			amount: 3, bevelThickness: 1, bevelSize: 1, bevelEnabled: true
+			//material: 0, extrudeMaterial: 1
+		};
+		var geometry = tileShape.extrude(extrusionSettings);
+
+		// var meshGeometry = new THREE.ShapeGeometry( terrainTile );
+		// var lineGeometry = new THREE.ShapeGeometry( terrainTile );
 		
 		var material = [
 			new THREE.MeshLambertMaterial({ 
-				color: _terrain.Colour
-			} )
+				color: this.terrain.Colour
+			})
 		];
 
-		var lineMaterial = new THREE.LineBasicMaterial( { color: '#000', linewidth: 1} );
+		// var lineMaterial = new THREE.LineBasicMaterial( { color: '#000', linewidth: 1} );
 		
-		var mesh = THREE.SceneUtils.createMultiMaterialObject( meshGeometry, material );
-		var line = new THREE.Line( lineGeometry, lineMaterial, THREE.LineStrip );
+		var mesh = THREE.SceneUtils.createMultiMaterialObject( geometry, material );
+		// var line = new THREE.Line( lineGeometry, lineMaterial, THREE.LineStrip );
 		
 		mesh.rotation.x = -90 * Math.PI / 180;
-		line.rotation.x = -90 * Math.PI / 180;
+		//mesh.rotation.z = -90 * Math.PI / 180;
+		//line.rotation.x = -90 * Math.PI / 180;
+		mesh.position = this.position;
+		mesh.receiveShadow = true;
+		//line.position = this.position;
 
-		_3dObject = mesh;
+		gameObject = mesh;
 
 		scene.add(mesh);
-		scene.add(line);
+		//scene.add(line);
 		
 		// Number token
-		if(_numberToken){
-			_numberToken.draw(scene, cx, -cz);
+		if(this.numberToken){
+			var topOfTile = this.position.clone();
+			topOfTile.y = 10;
+			this.numberToken.draw(scene, topOfTile);
 		}
 	};
 
-    return {
+	var terrainTile = function (position, terrain, resourceCard, numberToken) {
+		//_arrayPos = arrayPos;
+		this.terrain = terrain;
+		_resourceCard = resourceCard;
+		this.numberToken = numberToken;
+
+		this.position = position;
+
+		if(this.numberToken != null) {
+			this.numberToken.activated(resourceCreated);
+		}
+	};
+
+	terrainTile.prototype = {
+		constructor: terrainTile,
 		getTerrain: function() {
-			return _terrain;
+			return this.terrain;
 		},
         getResourceCard: function () {
-            return _resourceCard;
+            return this._resourceCard;
         },
 		getPosition: function () {
-			return _position;
+			return this._position;
 		},
 		getNumberToken: function () {
-			return _numberToken;
+			return this._numberToken;
 		},
 		takeRobber: function() {
 			_hasRobber = true;
@@ -105,10 +135,11 @@ KUPE.terrainTile = function (arrayPos, terrain, resourceCard, numberToken) {
 			return _hasRobber;
 		},
 		object: function() {
-			return _3dObject;
+			return gameObject;
 		},
-		draw: draw,
-		animate: animate,
+		draw: render,
         resourceCreatedSubscription: resourceCreatedSubscription
-    }
-};
+    };
+
+    return terrainTile;
+})();

@@ -5,10 +5,18 @@ KUPE.settlement = function (terrainTiles) {
 		_terrainTiles = terrainTiles,
 		_resourceGainedCallback = [];
 
+	/**
+	 * Registers the callback function, which will be invoked when 
+	 * @param {callback}
+	 */
 	var resourceGainedEvent = function(callback) {
 		_resourceGainedCallback.push(callback);
 	};
 
+	/**
+	 * 
+	 * @param resourceCard
+	 */
 	var resourceCreated = function(resourceCard) {
 		console.log("Settlement gained: " + resourceCard.getName());
 		
@@ -17,6 +25,9 @@ KUPE.settlement = function (terrainTiles) {
 		}
 	};
 
+	function draw(source) {
+
+	}
 
 	for(var i = 0; i < _terrainTiles.length; i++) {
 		_terrainTiles[i].resourceCreatedSubscription(resourceCreated);
@@ -24,6 +35,7 @@ KUPE.settlement = function (terrainTiles) {
 
 
 	return {
+		draw: draw,
 		registerResourceGained : resourceGainedEvent
 	};
 };

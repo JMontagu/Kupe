@@ -5,18 +5,34 @@ KUPE.numberTile = function (number, colour) {
 		_colour = colour,
         _callback;
 
-    var diceRollEvent = function (msg, data) {
-		console.log("Rolled");
-        if (data === _number) {
+    /**
+     * Called each time the dice is rolled. If the dice number matches
+     * this number token, invoke the registered callback function.
+     * @param  {string} msg The dice rolled message
+     * @param  {integer} diceNumber The number of the dice roll
+     */
+    var diceRollEvent = function (msg, diceNumber) {
+        if (diceNumber === _number) {
             _callback();
         }
     };
 
+    /**
+     * Registers a callback function to be invoked if a dice roll 
+     * matches the value of this number token
+     * @param  {Function} callback The callback function to be invoked
+     */
     var activated = function (callback) {
         _callback = callback;
     };
 	
-	var draw = function(scene, posX, posY) {
+	/**
+	 * Draws this numberTile object onto the scene, at the given coordinates
+	 * @param  {THREE.3dObject} scene The scene to attach this object too
+	 * @param  {number} posX The X-coord this object will display at
+	 * @param  {number} posY The Y-coord this object will display at
+	 */
+	var draw = function(scene, position) {
 		var numberPosX = (_number < 10) ? 125 : 100;
 		
 		// Number
@@ -35,9 +51,8 @@ KUPE.numberTile = function (number, colour) {
 		var numberToken = new THREE.Mesh(new THREE.CircleGeometry( 16, 64 ), patchMaterial );
 
 		numberToken.rotation.x = -90 * Math.PI / 180;
-		numberToken.position.y = 1;
-		numberToken.position.x = posX;
-		numberToken.position.z = posY;
+		numberToken.position = position;
+		//numberToken.position.y = 50;
 
 		scene.add(numberToken);
 	};

@@ -1,12 +1,41 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 	<head>
-	<!-- 	<script data-main="scripts/main" src="js/require.js"></script> -->
+		<link href="modern.css" rel="stylesheet">
+		<style type="text/css">
+			body {
+				background-color: #EEE8CD;
+			}
+
+			div#interface {
+				position: absolute;
+				width: 25%;
+				padding: .6em;
+				margin-left: .75em;
+			}
+		</style>
 	</head>
 	
-	<body style="background-color: #EEE8CD">
-		<div>			
-			<div id="gameBoard" />
+	<body class="metrouicss">
+		<div id="gameBoard" class="page">			
+			<div id="interface" class="page snapped bg-color-greenLight">
+				<div class="page-header">
+					<h1>Kupe</h1>
+					<h3>Inspired by The Settlers of Catan</h3>
+				</div>
+				<div class="page-region">
+					<p>Player: <span id="playerName"></span></p>
+					<button id="rollDice" class="big">Roll Dice</button>
+					<button id="endTurn" class="big">End turn</button>
+					<span>Rolled <span id="diceNumber">nothing yet</span></span>
+					<ul id="gameState" />
+				</div>
+
+				<div class="footer">
+					Powered by <a href="http://threejs.org/">three.js</a><br/>
+					Source at <a href="https://github.com/JMontagu/Kupe">GitHub</a>
+				</div>
+			</div>
 		</div>
 	
 		<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.8/jquery.min.js"></script>
@@ -35,9 +64,24 @@
 			};
 			
 			$(function () {
-				var $gameBoard = $('#gameBoard');
+				var $gameBoard = $('#gameBoard'),
+					$gameState = $('#gameState'),
+					$player = $('#playerName');
+
 				kupeGame = new KUPE.game($gameBoard);
 				start();
+
+				$player.html(kupeGame.currentPlayer().getName());
+
+				$("#rollDice").click(function() {
+					var diceNumber = kupeGame.rollDice();
+					$("#diceNumber").html(diceNumber);
+				});
+
+				$("#endTurn").click(function() {
+					kupeGame.endTurn();
+					$player.html(kupeGame.currentPlayer().getName());
+				});
 			});
 			
 			
