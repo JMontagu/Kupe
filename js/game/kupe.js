@@ -212,7 +212,7 @@ KUPE.game = (function () {
 		scene.add(camera);
 
 		cameraControls = new THREE.OrbitControls(camera);
-		//cameraControls.maxPolarAngle = Math.PI/3; 
+		cameraControls.maxPolarAngle = Math.PI/3; 
 		cameraControls.minDistance = 50;
 		cameraControls.maxDistance = 600;
 		//cameraControls.autoRotate = true;
@@ -314,6 +314,7 @@ KUPE.game = (function () {
 		drawBoard();
 		animate();
 
+		console.log("Game started");
 		startTurn();
 	};
 	
@@ -323,7 +324,6 @@ KUPE.game = (function () {
 			throw "Robber object has not been added to game";
 		}
 		
-		console.log("Game started");
 		gameHasStarted = true;
 		getPlayer();
 		console.log(getPlayer().getName() + " turn");
@@ -353,7 +353,7 @@ KUPE.game = (function () {
 			throw "Maximum number of players have joined this game";
 		}
 		
-        var newPlayer = new KUPE.player(PLAYER_COLOURS.pop(), name);
+        var newPlayer = new KUPE.Player(PLAYER_COLOURS.pop(), name);
         players.insert(newPlayer);
 
         PubSub.publish(PLAYER_JOINED, newPlayer);

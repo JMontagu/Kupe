@@ -50,6 +50,14 @@ KUPE.TerrainTile = function(position, terrain, resourceCard, numberToken) {
 	this.hasRobber = function() {
 		return this.hasRobber ? true : false;
 	};
+
+	this.getNumber = function() {
+		if(this.numberToken) {
+			return this.numberToken.getNumber();
+		} else {
+			return undefined;
+		}
+	};
 };
 
 KUPE.TerrainTile.prototype.resourceCreated = function() {
@@ -58,7 +66,7 @@ KUPE.TerrainTile.prototype.resourceCreated = function() {
 		return;
 	}
 
-    console.log("Created " + this.resourceCard.getName());
+    console.log(this.resourceCard.getName() + " produced");
 
     for(var i = 0; i < this.resourceSubscriptions.length; i++) {
         this.resourceSubscriptions[i](this.resourceCard);

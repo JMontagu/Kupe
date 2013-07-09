@@ -37,8 +37,8 @@
 				</div>
 			</div>
 		</div>
-	
-		<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.8/jquery.min.js"></script>
+
+		<script src="js/lib/jquery.js"></script>
 		<script src="js/lib/three.js"></script>
 		<script src="js/lib/OrbitControls.js"></script>
 		<script src="js/lib/linkedList.js"></script>
@@ -59,8 +59,15 @@
 			
 			function start() {			
 				kupeGame.createPlayer("Jade");
-				kupeGame.createPlayer("Craig");
+				//kupeGame.createPlayer("Craig");
 				kupeGame.start();
+			};
+
+			function placeSettlements() {
+				var currentPlayer = kupeGame.currentPlayer();
+				var tiles = [kupeGame.getResourceTiles()[0], kupeGame.getResourceTiles()[1], kupeGame.getResourceTiles()[4]];
+
+				currentPlayer.createSettlement(tiles);
 			};
 			
 			$(function () {
@@ -70,6 +77,8 @@
 
 				kupeGame = new KUPE.game($gameBoard);
 				start();
+
+				placeSettlements();
 
 				$player.html(kupeGame.currentPlayer().getName());
 

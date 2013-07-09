@@ -1,57 +1,61 @@
-KUPE.player = function(colour, name) {
-	var _colour = colour,
-		_name = name,
-		_settlements = [],
-		_cities = [],
-		_roads = [],
-		_resourceCards = [],
-		_developmentCards = [];
-		
+var KUPE = KUPE || {};
+
+KUPE.Player = function(colour, name) {
 	var MAX_SETTLEMENTS = 5;
-	var MAX_CITIES = 4;
-	var MAX_ROADS = 15;
+		MAX_CITIES = 4;
+		MAX_ROADS = 15;
 
-	var collectResource = function(resourceCard, quantity) {
-		console.log("Player " + _name + " has gained " + quantity + " cards of type " + resourceCard.getName());
-		
-		for(var i = 0; i < quantity; i++) {
-			_resourceCards.push(resourceCard);
-		}
-	};
+	this.colour = colour;
+	this.playerName = name;
 
-	var createSettlement = function(settlement) {
-		if(!settlement || !(settlement instanceof KUPE.settlement)) {
-			throw "invalid settlement object"; 
-		}
-		if(_settlements.length >= MAX_SETTLEMENTS) {
-			throw "max settlements created";
-		}
-		
-		settlement.registerResourceGained(collectResource);
-		_settlements.push(settlement);
-		
-		console.log(_name + " has built a settlement. Now has " + _settlements.length);
-	};
-	
-	var calculatePoints = function() {
-	
-	};
+	this.resourceCards = [];
+	this.developmentCards = [];
+	this.cities = [];
+	this.settlements = [];
+	this.roads = [];
 
-	return {
-		getName : function() {
-			return _name;
-		},
-		getColour : function() {
-			return _colour;
-		},
-		getResourceCards : function() {
-			return _resourceCards;
-		},
-		getSettlements : function() {
-			return _settlements;
-		},
-		getPoints : calculatePoints,
-		createSettlement : createSettlement
+	this.getName = function() {
+		return this.playerName;
+	};
+};
+
+/**
+ * Callback invoked by settlements when a resource has been produced
+ * @param  {[type]} resourceCard The resource produced
+ * @param  {[type]} quantity The number of resource cards produced
+ * @return {[type]}
+ */
+KUPE.Player.prototype.collectSettlementResource = function(resourceCard, quantity) {
+	console.log("Player " + this.getName() + " has gained " + quantity + " card of type " + resourceCard.getName());
+		
+	for(var i = 0; i < quantity; i++) {
+		this.resourceCards.push(resourceCard);
 	}
 
+	console.log("Resources: ");
+	for(var i = 0; i < this.resourceCards.length; i++){
+		console.log(this.resourceCards[i].getName());
+	}
+};
+
+/**
+ * Creates a settlement boardering the provided terrain tiles. If a terrain tile produces a resource, this settlement will collect it.
+ * @param  {Array} terrainTiles The three terrain tiles this settlement will collect from
+ */
+KUPE.Player.prototype.createSettlement = function(terrainTiles) {
+	var settlement = new KUPE.Settlement(terrainTiles, this.colour);
+	settlement.registerResourceGained(this.collectSettlementResource.bind(this));
+
+	this.settlements.push(settlement);
+	
+	console.log(this.getName() + " has built a settlement. Will get resources for:");
+	for(var i = 0; i < terrainTiles.length; i++) {
+		if(!terrainTiles[i].getResourceCard()) continue;
+
+		var resourceCard = terrainTiles[i].getResourceCard(),
+			resourceName = resourceCard ? resourceCard.getName() : " Nothing";
+
+
+		console.log(""+ terrainTiles[i].getNumber() + ": " + resourceName);
+	}
 };
