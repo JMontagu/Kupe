@@ -59,3 +59,25 @@ KUPE.Player.prototype.createSettlement = function(terrainTiles) {
 		console.log(""+ terrainTiles[i].getNumber() + ": " + resourceName);
 	}
 };
+
+/**
+ * Upgrades the settlement
+ * @param  {[type]} settlement
+ * @return {[type]}
+ */
+KUPE.Player.prototype.upgradeSettlement = function(settlement) {
+	settlement.registerResourceGained(this.collectSettlementResource.bind(this));
+
+	this.settlements.push(settlement);
+	
+	console.log(this.getName() + " has updated a settlement to a city. Will now get 2x resources for:");
+	for(var i = 0; i < terrainTiles.length; i++) {
+		if(!terrainTiles[i].getResourceCard()) continue;
+
+		var resourceCard = terrainTiles[i].getResourceCard(),
+			resourceName = resourceCard ? resourceCard.getName() : " Nothing";
+
+
+		console.log(""+ terrainTiles[i].getNumber() + ": " + resourceName);
+	}
+};

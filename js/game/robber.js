@@ -35,17 +35,25 @@ KUPE.Robber.prototype.diceRolled = function(msg, diceNumber) {
  * @param  {KUPE.TerrainTile} terrainTile The terrain tile this robber will move to
  */
 KUPE.Robber.prototype.moveToTile = function(terrainTile) {
-		if(!this.isActive) {
-			throw new Error("moveToTile(): Cannot move an inactive robber");
-		}
+		// if(!this.isActive) {
+		// 	throw new Error("moveToTile(): Cannot move an inactive robber");
+		// }
 		
+		if(this.activeTerrainTile && this.activeTerrainTile == terrainTile) {
+			this.draw();
+			return;
+		}
+
 		// Old tile
-		if(this.activeTerrainTile !== undefined) {
-			this.activeTerrainTile.hasRobber = false;
+		if(this.activeTerrainTile) {
+			this.activeTerrainTile.loseRobber();
+			this.activeTerrainTile = null;
 		}
 
 		this.activeTerrainTile = terrainTile;
-		this.activeTerrainTile.hasRobber = true;
+		this.activeTerrainTile.takeRobber();
+
+		console.log("Robber moved to " + terrainTile.getTerrain().Name + ", Number: " + this.activeTerrainTile.getNumber());
 		
 		this.draw();
 };

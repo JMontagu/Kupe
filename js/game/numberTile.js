@@ -59,14 +59,13 @@ KUPE.NumberTile.prototype.draw = function(scene, position) {
 
 	// Create 'token'
 	var patchMaterial =	new THREE.MeshLambertMaterial({map: numberTexture });
-	//var numberToken = new THREE.Mesh(new THREE.CircleGeometry( 16, 64 ), patchMaterial );
-	var numberToken = new THREE.Mesh(token, patchMaterial);
+	var numberToken = new THREE.Mesh(new THREE.CircleGeometry( 16, 64 ), patchMaterial );
+	//var numberToken = new THREE.Mesh(token, patchMaterial);
 
-	//numberToken.rotation.x = -90 * Math.PI / 180;
+	numberToken.rotation.x = -90 * Math.PI / 180;
 	numberToken.position = position;
-	numberToken.position.y = 0;
+	numberToken.position.y = 1;
 	numberToken.castShadow = true;
-	//numberToken.position.y = 50;
 
 	scene.add(numberToken);
 };

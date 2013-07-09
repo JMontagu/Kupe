@@ -11,7 +11,7 @@ KUPE.TerrainTile = function(position, terrain, resourceCard, numberToken) {
 	this.resourceCard = resourceCard;
 	this.numberToken = numberToken;
 
-	this.hasRobber = false;
+	this.tileHasRobber = false;
 	this.resourceSubscriptions = [];
 	this.object = {};
 
@@ -19,7 +19,7 @@ KUPE.TerrainTile = function(position, terrain, resourceCard, numberToken) {
 		this.numberToken.activated(this.resourceCreated.bind(this));
 	}
 
-	this.TILE_SIZE = function() {
+	this.tileSize = function() {
 		return TILE_SIZE;
 	};
 
@@ -40,15 +40,15 @@ KUPE.TerrainTile = function(position, terrain, resourceCard, numberToken) {
 	};
 
 	this.takeRobber = function() {
-		this.hasRobber = true;
+		this.tileHasRobber = true;
 	};
 
 	this.loseRobber = function() {
-		this.hasRobber = false;
+		this.tileHasRobber = false;
 	};
 
 	this.hasRobber = function() {
-		return this.hasRobber ? true : false;
+		return this.tileHasRobber;
 	};
 
 	this.getNumber = function() {
@@ -61,7 +61,7 @@ KUPE.TerrainTile = function(position, terrain, resourceCard, numberToken) {
 };
 
 KUPE.TerrainTile.prototype.resourceCreated = function() {
-	if(!this.hasRobber) {
+	if(this.tileHasRobber) {
 		console.log("Robber stole " + this.resourceCard.getName());
 		return;
 	}
@@ -87,21 +87,20 @@ KUPE.TerrainTile.prototype.resourceCreatedSubscription = function(callback) {
  * @return {[type]}
  */
 KUPE.TerrainTile.prototype.draw = function(scene) {
-	var TILE_SIZE = this.TILE_SIZE(),
-	 	tilePts = [],
+	var tilePts = [],
 	 	tileShape,
 	 	extrusionSettings,
 	 	geometry,
 	 	material,
 	 	mesh;
 
-	tilePts.push( new THREE.Vector2 (0, -TILE_SIZE/2) );
-	tilePts.push( new THREE.Vector2 (TILE_SIZE/2, -TILE_SIZE/4) );
-	tilePts.push( new THREE.Vector2 (TILE_SIZE/2, TILE_SIZE/4) );
-	tilePts.push( new THREE.Vector2 (0, TILE_SIZE/2) );
-	tilePts.push( new THREE.Vector2 (-TILE_SIZE/2, TILE_SIZE/4) );
-	tilePts.push( new THREE.Vector2 (-TILE_SIZE/2, -TILE_SIZE/4) );
-	tilePts.push( new THREE.Vector2 (0, -TILE_SIZE/2) );
+	tilePts.push( new THREE.Vector2 (0, -this.tileSize()/2) );
+	tilePts.push( new THREE.Vector2 (this.tileSize()/2, -this.tileSize()/4) );
+	tilePts.push( new THREE.Vector2 (this.tileSize()/2, this.tileSize()/4) );
+	tilePts.push( new THREE.Vector2 (0, this.tileSize()/2) );
+	tilePts.push( new THREE.Vector2 (-this.tileSize()/2, this.tileSize()/4) );
+	tilePts.push( new THREE.Vector2 (-this.tileSize()/2, -this.tileSize()/4) );
+	tilePts.push( new THREE.Vector2 (0, -this.tileSize()/2) );
 
 	tileShape = new THREE.Shape(tilePts);
 	extrusionSettings = {

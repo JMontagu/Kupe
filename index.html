@@ -9,7 +9,7 @@
 
 			div#interface {
 				position: absolute;
-				width: 25%;
+				width: 15%;
 				padding: .6em;
 				margin-left: .75em;
 			}
@@ -65,9 +65,24 @@
 
 			function placeSettlements() {
 				var currentPlayer = kupeGame.currentPlayer();
-				var tiles = [kupeGame.getResourceTiles()[0], kupeGame.getResourceTiles()[1], kupeGame.getResourceTiles()[4]];
 
-				currentPlayer.createSettlement(tiles);
+				currentPlayer.createSettlement([
+					kupeGame.getResourceTiles()[0],
+					kupeGame.getResourceTiles()[1], 
+					kupeGame.getResourceTiles()[4]
+				]);
+
+				currentPlayer.createSettlement([
+					kupeGame.getResourceTiles()[1],
+					kupeGame.getResourceTiles()[2], 
+					kupeGame.getResourceTiles()[5]
+				]);
+
+				currentPlayer.createSettlement([
+					kupeGame.getResourceTiles()[9],
+					kupeGame.getResourceTiles()[10], 
+					kupeGame.getResourceTiles()[14]
+				]);
 			};
 			
 			$(function () {

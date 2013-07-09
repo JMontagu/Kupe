@@ -4,15 +4,18 @@ KUPE.Settlement = function (terrainTiles, playerColour) {
 	if(terrainTiles === null) {
 		throw new Error("Settlement(): terrainTiles is null");
 	}
-	this.terrainTiles = terrainTiles || [];
+	this.terrainTiles = terrainTiles;
 	this.playerColour = playerColour;
 	this.resourceGainedCallbacks = [];
+	this.resourceStats = {};
 	this.object;
 
 	// Subscribe this settlement to all of its terrain tile resource created events
 	for(var i = 0; i < this.terrainTiles.length; i++) {
 		this.terrainTiles[i].resourceCreatedSubscription(this.resourceCreated.bind(this));
 	}
+
+	this.draw();
 };
 
 /**
@@ -20,8 +23,21 @@ KUPE.Settlement = function (terrainTiles, playerColour) {
  * @param  {[type]} resourceCard
  */
 KUPE.Settlement.prototype.resourceCreated = function(resourceCard) {
-	console.log("Settlement gained: " + resourceCard.getName());
+	var resourceName = resourceCard.getName();
+	console.log("Settlement gained: " + resourceName);
 	
+	if(!this.resourceStats[resourceName]) {
+		this.resourceStats[resourceName] = 0;
+	}
+
+	this.resourceStats[resourceName] += 1;
+
+
+	console.log("Settlement stats:");
+	for(var i = 0; i < this.resourceStats.length; i++) {
+		console.log(this.resourceStats[i]);
+	}
+
 	for(var i = 0; i < this.resourceGainedCallbacks.length; i++) {
 		this.resourceGainedCallbacks[i](resourceCard, 1);
 	}
@@ -56,17 +72,29 @@ KUPE.Settlement.prototype.draw = function() {
 		};
 		var geometry = settlementShape.extrude(extrusionSettings);
 
-		var settlement = new THREE.CubeGeometry(20, 20, 60)
-		var material = new THREE.MeshPhongMaterial({ shininess: 80, ambient: 0x444444, color: this.playerColour, specular: this.playerColour});
+		var material = new THREE.MeshPhongMaterial({ shininess: 0, ambient: 0x444444, color: this.playerColour, specular: this.playerColour});
 		var mesh = new THREE.Mesh(geometry, material);
 
-		// Todo: get my 3d coords sorted!
-		mesh.position.z = settlement.height+10/2;
+		var centerTileX = 0,
+			centerTileZ = 0,
+			terrainTileSize = this.terrainTiles[0].tileSize();
+
+		for(var i = 0; i < this.terrainTiles.length; i++) {
+			centerTileX += this.terrainTiles[i].object.position.x;
+			centerTileZ += this.terrainTiles[i].object.position.z;
+		}
+		
+		//mesh.position.z = settlement.height;
 		mesh.rotation.y = -90 * Math.PI / 180;
+		mesh.position.x = (centerTileX/3);
+		mesh.position.y = (centerTileZ/3);
+		mesh.position.z = 3;
 		mesh.castShadow = true;
 
 		this.object = mesh;
 	}
+
+	this.terrainTiles[0].object.add(this.object);
 };
 
 // 	var self = this,

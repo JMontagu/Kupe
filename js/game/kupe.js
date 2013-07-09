@@ -183,7 +183,7 @@ KUPE.game = (function () {
 		parent, 
 		container;
 		
-	var PLAYER_COLOURS = ['Red', 'Blue', 'White', 'Orange'];
+	var PLAYER_COLOURS = [0xff0000, 0x0000ff, 0xFFFFFF, 0xFFA500];
     var DICE_ROLLED = "diceRolled",
     	PLAYER_JOINED = "playerJoined";
 
@@ -208,7 +208,7 @@ KUPE.game = (function () {
 		scene = new THREE.Scene();
 
 		camera = new THREE.PerspectiveCamera( VIEW_ANGLE, ASPECT, NEAR, FAR);
-		camera.position.z = 600;
+		camera.position.z = 2000;
 		scene.add(camera);
 
 		cameraControls = new THREE.OrbitControls(camera);
@@ -223,11 +223,20 @@ KUPE.game = (function () {
 		light.position.multiplyScalar( 30 );
 		scene.add( light );
 
-		var ambient_clr = new THREE.Color(0.9, 0.9, 0.9);
+		var ambient_clr = new THREE.Color(1, 1, 1);
 		var ambientLight = new THREE.AmbientLight(ambient_clr.getHex());
 		scene.add(ambientLight);
 
-		scene.add( new THREE.AxisHelper(100) );
+		// Plane
+		// add a base plane on which we'll render our map
+		var planeGeo = new THREE.PlaneGeometry(10000, 10000, 10, 10);
+		var planeMat = new THREE.MeshLambertMaterial({color: 0x00E5EE});
+		var plane = new THREE.Mesh(planeGeo, planeMat);
+		plane.position.y = -10;
+		plane.rotation.x = -Math.PI/2;
+		scene.add(plane);
+
+		//scene.add( new THREE.AxisHelper(100) );
 
 		projector = new THREE.Projector();
 
@@ -258,8 +267,14 @@ KUPE.game = (function () {
 
 		var intersects = raycaster.intersectObjects(ingameObjects);
 
-		if ( intersects.length > 0 ) {
-			intersects[0].object.material.color.setHex(Math.random() * 0xffffff);
+		if (intersects.length > 0 ) {
+			var obj = intersects[0].object;
+			for(var i = 0; i < terrainTiles.length; i++) {
+				if(obj === terrainTiles[i].object) {
+					//console.log("Click");					
+					self.robr.moveToTile(terrainTiles[i]);
+				}
+			}
 		}
 	};
 
