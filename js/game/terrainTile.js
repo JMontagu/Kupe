@@ -3,6 +3,9 @@
 KUPE.TerrainTile = function(position, terrain, resourceCard, numberToken) {
 	var TILE_SIZE = 120;
 
+	if(position === null) throw new Error("TerrainTile(): null object: position");
+	if(terrain === null) throw new Error("TerrainTile(): null object: terrain");
+
 	this.position = position;
 	this.terrain = terrain;
 	this.resourceCard = resourceCard;
@@ -50,7 +53,7 @@ KUPE.TerrainTile = function(position, terrain, resourceCard, numberToken) {
 };
 
 KUPE.TerrainTile.prototype.resourceCreated = function() {
-	if(this.hasRobber) {
+	if(!this.hasRobber) {
 		console.log("Robber stole " + this.resourceCard.getName());
 		return;
 	}

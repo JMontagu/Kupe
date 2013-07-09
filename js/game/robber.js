@@ -41,11 +41,11 @@ KUPE.Robber.prototype.moveToTile = function(terrainTile) {
 		
 		// Old tile
 		if(this.activeTerrainTile !== undefined) {
-			this.activeTerrainTile.loseRobber();
+			this.activeTerrainTile.hasRobber = false;
 		}
 
-		terrainTile.takeRobber();
 		this.activeTerrainTile = terrainTile;
+		this.activeTerrainTile.hasRobber = true;
 		
 		this.draw();
 };

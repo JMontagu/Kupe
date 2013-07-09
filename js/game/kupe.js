@@ -101,7 +101,7 @@ KUPE.tileGenerator = function () {
 
         if (numberToken.Quantity > 0) {
             numberToken.Quantity -= 1;
-            return new KUPE.numberTile(numberToken.Number, numberToken.Colour);
+            return new KUPE.NumberTile(numberToken.Number, numberToken.Colour);
         } else {
             return getNumberToken();
         }
@@ -308,7 +308,7 @@ KUPE.game = (function () {
 	
 	var startGame = function() {
 		terrainTiles = self.tileGenerator.createTiles(function(numberToken) {
-			PubSub.subscribe(DICE_ROLLED, numberToken.diceRolled);
+			PubSub.subscribe(DICE_ROLLED, numberToken.diceRolled.bind(numberToken));
 		});
 		
 		drawBoard();
