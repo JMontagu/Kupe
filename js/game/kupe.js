@@ -15,55 +15,61 @@ KUPE.tileGenerator = function () {
 	var TOKEN_COLOUR_NORMAL = '#000000',
 		TOKEN_COLOUR_SPECIAL = '#FF0000';
 
-    var resources = [   { 
-							Terrain: { 
-								Name: "Forest", 
-								Colour: '#0d3b02'
-							},
-							Resource: new KUPE.resourceCard('Lumber', '#659D32'), 
-							Quantity: 4 
+	var oceanTile = {
+		Terrain: {
+			Name: "Ocean", 
+			Colour: '#1C6BA0'
+		},
+	};
+
+    var resources = [{ 
+						Terrain: { 
+							Name: "Forest", 
+							Colour: '#0d3b02'
 						},
-                        { 
-							Terrain: {
-								Name: "Pasture", 
-								Colour: '#91d653'
-							},
-							Resource: new KUPE.resourceCard('Wool', ''), 
-							Quantity: 4 
+						Resource: new KUPE.resourceCard('Lumber', '#659D32'), 
+						Quantity: 4 
+					},
+					{ 
+						Terrain: {
+							Name: "Pasture", 
+							Colour: '#91d653'
 						},
-                        { 
-							Terrain: {
-								Name: "Fields", 
-								Colour: '#d0b336'
-							},
-							Resource: new KUPE.resourceCard('Grain', ''), 
-							Quantity: 4 
+						Resource: new KUPE.resourceCard('Wool', ''), 
+						Quantity: 4 
+					},
+					{ 
+						Terrain: {
+							Name: "Fields", 
+							Colour: '#d0b336'
 						},
-                        { 
-							Terrain: {
-								Name: "Hills", 
-								Colour: '#ac5b19'
-							},
-							Resource: new KUPE.resourceCard('Brick', ''), 
-							Quantity: 3 
+						Resource: new KUPE.resourceCard('Grain', ''), 
+						Quantity: 4 
+					},
+					{ 
+						Terrain: {
+							Name: "Hills", 
+							Colour: '#ac5b19'
 						},
-                        { 
-							Terrain: {
-								Name: "Mountains", 
-								Colour: '#2e4257',
-								Image: 'assets/terrainTiles/mountain.jpg'
-							},
-							Resource: new KUPE.resourceCard('Ore', ''), 
-							Quantity: 3
+						Resource: new KUPE.resourceCard('Brick', ''), 
+						Quantity: 3 
+					},
+					{ 
+						Terrain: {
+							Name: "Mountains", 
+							Colour: '#2e4257',
+							Image: 'assets/terrainTiles/mountain.jpg'
 						},
-						{ 
-							Terrain: {
-								Name: "Desert", 
-								Colour: '#EDC9AF'
-							},
-							Quantity: 1
-						}
-						]
+						Resource: new KUPE.resourceCard('Ore', ''), 
+						Quantity: 3
+					},
+					{ 
+						Terrain: {
+							Name: "Desert", 
+							Colour: '#EDC9AF'
+						},
+						Quantity: 1
+					}];
 
     var numberTokens = [{ Number: 2, Quantity: 1, Colour: TOKEN_COLOUR_NORMAL },
                         { Number: 3, Quantity: 2, Colour: TOKEN_COLOUR_NORMAL },
@@ -121,7 +127,7 @@ KUPE.tileGenerator = function () {
 
 				var pos = new THREE.Vector3(posX * (KUPE.settings.TILE_SIZE+2), 
 											0, 
-											i * ((KUPE.settings.TILE_SIZE+2)*0.75));
+											i * ((KUPE.settings.TILE_SIZE+1)*0.75));
 
 				// HACK
 				if(i === Math.floor(tilePattern.length/2)) {
@@ -130,7 +136,7 @@ KUPE.tileGenerator = function () {
 					pos.x += (KUPE.settings.TILE_SIZE/2);
 				}
 
-				tile = new KUPE.terrainTile(pos, resource.Terrain, resource.Resource, numberToken);
+				tile = new KUPE.TerrainTile(pos, resource.Terrain, resource.Resource, numberToken);
 				
 				tiles.push(tile);
 
@@ -183,7 +189,7 @@ KUPE.game = (function () {
 
     var game = function (container) {
 		self.tileGenerator = new KUPE.tileGenerator();
-        self.dice = new KUPE.dice();
+        self.dice = [new KUPE.Dice(1,6), new KUPE.Dice(1,6)];
 		self.container = container;
 		
 		init();
@@ -194,37 +200,34 @@ KUPE.game = (function () {
 			antialias: true
 		});
 		renderer.setSize(SCREEN_WIDTH, SCREEN_HEIGHT);
-		renderer.shadowMapEnabled = true;
-		renderer.shadowMapSoft = true;
+		renderer.gammaInput = true;
+		renderer.gammaOutput = true;
+		renderer.physicallyBasedShading = true;
+		renderer.setClearColor(0x87CEEB);
 		
 		scene = new THREE.Scene();
-		scene.fog = new THREE.FogExp2(0xcccccc, 0.001);
-		
+
 		camera = new THREE.PerspectiveCamera( VIEW_ANGLE, ASPECT, NEAR, FAR);
 		camera.position.z = 600;
 		scene.add(camera);
 
 		cameraControls = new THREE.OrbitControls(camera);
-		cameraControls.maxPolarAngle = Math.PI/3; 
+		//cameraControls.maxPolarAngle = Math.PI/3; 
 		cameraControls.minDistance = 50;
 		cameraControls.maxDistance = 600;
 		//cameraControls.autoRotate = true;
 		cameraControls.addEventListener('change', render);
 		
-		var light = new THREE.DirectionalLight(0xffffff);
-		light.position.set(0, 200, 300);
-		light.target.position.set(0, 0, 0);
-		light.castShadow = true;
-		light.shadowDarkness = 1;
-		light.shadowCameraVisible = true; // only for debugging
-		// these six values define the boundaries of the yellow box seen above
-		light.shadowCameraNear = 50;
-		light.shadowCameraFar = 555;
-		light.shadowCameraLeft = -50;
-		light.shadowCameraRight = 50;
-		light.shadowCameraTop = 50;
-		light.shadowCameraBottom = -50;
-		scene.add(light);
+		var light = new THREE.PointLight( 0xffffff, 1 );
+		light.position.set( 4, 5, 1 );
+		light.position.multiplyScalar( 30 );
+		scene.add( light );
+
+		var ambient_clr = new THREE.Color(0.9, 0.9, 0.9);
+		var ambientLight = new THREE.AmbientLight(ambient_clr.getHex());
+		scene.add(ambientLight);
+
+		scene.add( new THREE.AxisHelper(100) );
 
 		projector = new THREE.Projector();
 
@@ -245,14 +248,13 @@ KUPE.game = (function () {
 
 		var raycaster = new THREE.Raycaster(camera.position, vector.sub(camera.position).normalize());
 
-		//var intersects = raycaster.intersectObjects(scene.children);
 		var ingameObjects = [];
 
 		for (var i = terrainTiles.length; i--;) {
-			ingameObjects.push(terrainTiles[i].object());
+			ingameObjects.push(terrainTiles[i].object);
 		}
 
-		ingameObjects.push(self.robr.object());
+		ingameObjects.push(self.robr.object);
 
 		var intersects = raycaster.intersectObjects(ingameObjects);
 
@@ -277,7 +279,7 @@ KUPE.game = (function () {
 			}
 		}
 
-		scene.add(parent);	
+		scene.add(parent);
 		cameraControls.center = terrainTiles[9].position;
 	};
 	
@@ -308,8 +310,6 @@ KUPE.game = (function () {
 		terrainTiles = self.tileGenerator.createTiles(function(numberToken) {
 			PubSub.subscribe(DICE_ROLLED, numberToken.diceRolled);
 		});
-
-        self.dice = new KUPE.dice();
 		
 		drawBoard();
 		animate();
@@ -336,7 +336,7 @@ KUPE.game = (function () {
 		if(!diceHasBeenRolled) {
 			return "Please roll the dice";
 		}	
-		if(self.robber.isActive()) {
+		if(self.robr.isActive) {
 			return "Please place the Robber";
 		}
 		
@@ -367,7 +367,10 @@ KUPE.game = (function () {
 			return;
 		}
 		
-        var number = self.dice.rollPair();
+        var number = 0;
+        for (var i = 0; i < self.dice.length; i++) {
+        	number += self.dice[i].roll();
+		}
         diceHasBeenRolled = true;
         PubSub.publish(DICE_ROLLED, number);
 		
